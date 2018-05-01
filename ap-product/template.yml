@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transfrom: AWS::Serverless-2016-10-31
+Description: Product service
+Resources:
+  Products:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.handler
+      Runtime: nodejs6.10
+      CodeUri: ./dist/
+      Events:
+        ListProducts:
+          Type: Api
+          Properties:
+            Path: /products/list
+            Method: get
+        CreateProduct:
+          Type: Api
+          Properties:
+            Path: /products
+            Method: post
+        GetProduct:
+          Type: Api
+          Properties:
+            Path: /products/detail/{id}
+            Method: get
+
