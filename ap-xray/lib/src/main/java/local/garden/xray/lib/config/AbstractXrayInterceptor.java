@@ -12,9 +12,9 @@ public abstract class AbstractXrayInterceptor {
             Subsegment subsegment = AWSXRay.beginSubsegment(pjp.getSignature().getName());
             subsegment.setMetadata(XRayInterceptorUtils.generateMetadata(pjp, subsegment));
             return XRayInterceptorUtils.conditionalProceed(pjp);
-        } catch (Exception e) {
-            AWSXRay.getCurrentSegment().addException(e);
-            throw e;
+        } catch (Throwable t) {
+            AWSXRay.getCurrentSegment().addException(t);
+            throw t;
         } finally {
             AWSXRay.endSubsegment();
         }
