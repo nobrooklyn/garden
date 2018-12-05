@@ -1,5 +1,17 @@
+cloud:
+  aws:
+    region:
+      static: ap-northeast-1
+    stack:
+      auto: false
+
 management:
   endpoints:
     web:
       exposure:
         include: info,prometheus,env,health
+  metrics:
+    export:
+      cloudwatch:
+        namespace: m3trics2
+        batchSize: 20
