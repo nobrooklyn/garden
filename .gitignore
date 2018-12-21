@@ -1,4 +1,5 @@
 target/
+dependency-reduced-pom.xml
 
 ### STS ###
 .apt_generated
@@ -30,3 +31,4 @@ nbdist/
 node_modules/
 package-lock.json
 dist/
+
