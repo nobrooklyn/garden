@@ -2,9 +2,6 @@ package local.garden.fluxs3;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -22,18 +19,18 @@ import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 @Component
 @Slf4j
 public class UploadHandler {
     private final S3AsyncClient s3;
+    private final FileRepository repo;
     private static final String bucket = "ap-cdk-bucket-1";
-    private static final String key = "app/test";
 
     @Autowired
-    public UploadHandler() {
+    public UploadHandler(FileRepository repo) {
         this.s3 = S3AsyncClient.builder().region(Region.AP_NORTHEAST_1).build();
+        this.repo = repo;
     }
 
     public RouterFunction<ServerResponse> route() {
@@ -49,8 +46,8 @@ public class UploadHandler {
     }
 
     private Mono<UploadResponse> putObject(final FilePart filePart) {
-        final PutObjectRequest req = PutObjectRequest.builder().bucket(bucket).key(key + "/" + filePart.filename())
-                .build();
+        final FileInfo info = FileInfoBuilder.create(filePart).build();
+        final PutObjectRequest req = PutObjectRequest.builder().bucket(bucket).key(info.getFid()).build();
 
         Path localPath = Paths.get(System.getProperty("java.io.tmpdir"), filePart.filename());
         filePart.transferTo(localPath);
@@ -58,23 +55,7 @@ public class UploadHandler {
         final AsyncRequestBody body = AsyncRequestBody.fromFile(localPath);
 
         return Mono.fromFuture(s3.putObject(req, body)).doOnError(e -> log.error(e.getMessage(), e))
-                .map(res -> new UploadResponse(req.bucket() + "/" + req.key(), res.versionId()));
+                .map(res -> new UploadResponse(req.key(), res.versionId())).doOnSuccess(res -> repo.save(info));
     }
 
-// -- for debug
-//    private CompletableFuture<PutObjectResponse> putObject2(final FilePart filePart) {
-//        CompletableFuture<PutObjectResponse> future = CompletableFuture.supplyAsync(() -> {
-//            log.info(filePart.filename() + " start.");
-//            PutObjectResponse res = PutObjectResponse.builder().versionId("1").build();
-//            try {
-//                TimeUnit.SECONDS.sleep(new Random().nextInt(5));
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            log.info(filePart.filename() + " done.");
-//            return res;
-//        });
-//
-//        return future;
-//    }
 }
