@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymleaf.org">
+
+<head>
+    <title>greeting</title>
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <h1>Greeting List</h1>
+    <div th:if="${!greetings.empty}">
+        <table>
+            <tr th:each="greeting : ${greetings}">
+                <td th:text="${greeting.id}"></td>
+                <td th:text="${greeting.message}"></td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>
